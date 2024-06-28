@@ -124,7 +124,7 @@ def upload_file():
 
 @app.route('/download-example')
 def download_example():
-    return send_from_directory(app.config['EXAMPLE_FOLDER'], 'example.xlsx', as_attachment=True)
+    return send_from_directory(app.config['EXAMPLE_FOLDER'], 'fluck.xlsx', as_attachment=True)
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
