@@ -1,7 +1,7 @@
+import os
 from flask import Flask, request, send_file, render_template
 import pandas as pd
 from fpdf import FPDF
-import os
 import datetime
 import random
 
@@ -15,9 +15,7 @@ class PDF(FPDF):
         self.show_headers = True
 
     def header(self):
-        # Добавление логотипа
-        self.image('fluck.png', 0, 4, 206)  # Параметры: путь, x, y, ширина
-        # Установим шрифт Arial жирный 12
+        self.image('fluck.png', 0, 4, 206)
         self.add_font('Arial', '', 'Arial.ttf', uni=True)
         self.add_font('Arial', 'B', 'Arial-Bold.ttf', uni=True)
         self.add_font('Arial', 'I', 'Arial-Italic.ttf', uni=True)
@@ -25,7 +23,6 @@ class PDF(FPDF):
         self.set_font('Arial', 'B', 6.8)
         self.set_stretching(95.0)
         if self.show_headers:
-            # Заголовки столбцов
             self.ln(16)
             self.cell(36, 4, 'Cable ID', 0, 0, 'L')
             self.cell(33, 4, 'Summary', 0, 0, 'L')
@@ -36,16 +33,13 @@ class PDF(FPDF):
             self.ln(3.8)
 
     def footer(self):
-        # Установим позицию на 1.5 см от нижнего края
         self.set_y(-28.5)
         self.image('blue_line.png', 6, 264, 195)
         self.image('fl.png', 145, 270, 50)
-        # Установим шрифт Arial курсив 8
         self.set_font('Arial', 'B', 9)
         self.set_x(6)
         current_date = datetime.datetime.now().strftime('%d/%m/%Y %H:%M:%S %p')
         self.cell(90, 8, current_date)
-        # Добавим номер страницы
         self.cell(0, 8, f'Page {self.page_no()}', 0, 0, 'L')
         self.ln(4)
         self.set_x(6)
@@ -70,35 +64,26 @@ def upload_file():
 
         pdf_filename = filepath.replace('.xlsx', '.flw')
 
-        # Обработка файла и генерация PDF
         df = pd.read_excel(filepath, engine='openpyxl')
-
         pdf = PDF(filename=file.filename)
         pdf.add_page()
         pdf.set_font('Arial', '', 6.8)
         pdf.set_stretching(95.0)
         h = 2.8
 
-        # Начальное время
         current_time = datetime.datetime.strptime(f"{start_date} {start_time}", "%Y-%m-%d %H:%M")
 
-        # Извлечение данных из первых двух столбцов и добавление даты и времени в конец
         for index, row in df.iterrows():
-            # Проверка текущей позиции Y и добавление новой страницы при необходимости
-            if pdf.get_y() > 260:  # Порог может быть изменен в зависимости от требований
+            if pdf.get_y() > 260:
                 pdf.add_page()
-
             pdf.cell(36, h, txt=str(row[0]))
             pdf.cell(33, h, txt=str(row[1]))
             pdf.cell(28, h, txt=str(row[2]))
             pdf.cell(30, h, txt=str(row[3]) + ' m')
             pdf.cell(32, h, txt=f'{random.randrange(100, 250, 1)/10:.2f} dB (NEXT)')
             pdf.cell(30, h, txt=current_time.strftime("%d/%m/%Y %H:%M"), ln=True)
-
-            # Увеличение времени на случайное количество секунд
             current_time += datetime.timedelta(seconds=random.randint(15, 59))
 
-        # Подсчет требуемой информации
         total_length = round(df['Length'].sum(), 2) if 'Length' in df.columns else 0
         total_reports = len(df)
         passing_reports = df[df['Summary'] == 'PASS'].shape[0] if 'Summary' in df.columns else 0
@@ -106,7 +91,6 @@ def upload_file():
         warning_reports = df[df['Summary'] == 'WARNING'].shape[0] if 'Summary' in df.columns else 0
         documentation_only = df[df['Summary'] == 'DOCUMENTATION ONLY'].shape[0] if 'Summary' in df.columns else 0
 
-        # Добавление итоговой страницы
         pdf.show_headers = False
         pdf.add_page()
         pdf.set_y(26)
@@ -138,4 +122,5 @@ def upload_file():
         return send_file(pdf_filename, as_attachment=True)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port, debug=True)
