@@ -21,7 +21,7 @@ fi
 heroku login
 
 # Создание нового приложения на Heroku (если не сделано ранее)
-APP_NAME="your-new-app-name"
+APP_NAME="fluck"
 if ! heroku apps | grep -q "$APP_NAME"; then
     heroku create "$APP_NAME"
 fi
