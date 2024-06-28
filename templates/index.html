@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Upload Excel</title>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Upload Excel File</h1>
+      <form method="post" enctype="multipart/form-data" action="/upload">
+        <div>
+          <label for="file">Choose Excel file</label>
+          <input type="file" name="file" id="file" accept=".xlsx">
+        </div>
+        <div>
+          <label for="start_date">Start Date</label>
+          <input type="date" name="start_date" id="start_date" required>
+        </div>
+        <div>
+          <label for="start_time">Start Time</label>
+          <input type="time" name="start_time" id="start_time" required>
+        </div>
+        <button type="submit">Upload</button>
+      </form>
+    </div>
+  </body>
+</html>
