@@ -1,12 +1,13 @@
-import os
-from flask import Flask, request, send_file, render_template
+from flask import Flask, request, send_file, render_template, send_from_directory
 import pandas as pd
 from fpdf import FPDF
+import os
 import datetime
 import random
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'uploads/'
+app.config['EXAMPLE_FOLDER'] = 'static/'
 
 class PDF(FPDF):
     def __init__(self, filename, *args, **kwargs):
@@ -120,6 +121,10 @@ def upload_file():
         pdf.output(pdf_filename)
 
         return send_file(pdf_filename, as_attachment=True)
+
+@app.route('/download-example')
+def download_example():
+    return send_from_directory(app.config['EXAMPLE_FOLDER'], 'example.xlsx', as_attachment=True)
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
