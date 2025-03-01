@@ -9,6 +9,44 @@ app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'uploads/'
 app.config['EXAMPLE_FOLDER'] = 'static/'
 
+# ✅ Перемещаем класс PDF ВЫШЕ, перед его первым использованием
+class PDF(FPDF):
+    def __init__(self, filename, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.filename = filename.replace('.xlsx', '.flw')
+        self.show_headers = True
+
+    def header(self):
+        self.image('fluck.png', 0, 4, 206)
+        self.add_font('Arial', '', 'Arial.ttf', uni=True)
+        self.add_font('Arial', 'B', 'Arial-Bold.ttf', uni=True)
+        self.add_font('Arial', 'I', 'Arial-Italic.ttf', uni=True)
+        self.add_font('Arial', 'BI', 'Arial-BoldItalic.ttf', uni=True)
+        self.set_font('Arial', 'B', 6.8)
+        self.set_stretching(95.0)
+        if self.show_headers:
+            self.ln(16)
+            self.cell(36, 4, 'Cable ID', 0, 0, 'L')
+            self.cell(33, 4, 'Summary', 0, 0, 'L')
+            self.cell(28, 4, 'Test Limit', 0, 0, 'L')
+            self.cell(30, 4, 'Length', 0, 0, 'L')
+            self.cell(32, 4, 'Headroom', 0, 0, 'L')
+            self.cell(30, 4, 'Date / Time', 0, 0, 'L')
+            self.ln(3.8)
+
+    def footer(self):
+        self.set_y(-28.5)
+        self.image('blue_line.png', 6, 264, 195)
+        self.image('fl.png', 145, 270, 50)
+        self.set_font('Arial', 'B', 9)        
+        self.set_x(6)
+        current_date = datetime.datetime.now().strftime('%d/%m/%Y %H:%M:%S %p')
+        self.cell(90, 8, current_date)
+        self.cell(0, 8, f'Page {self.page_no()}', 0, 0, 'L')
+        self.ln(4)
+        self.set_x(6)
+        self.cell(30, 8, self.filename)
+
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -91,45 +129,4 @@ def download_example():
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
-    app.config['EXAMPLE_FOLDER'] = 'static/'
-
-    if __name__ == '__main__':
-        port = int(os.environ.get("PORT", 5000))
-        app.run(host='0.0.0.0', port=port, debug=True)
-
-class PDF(FPDF):
-    def __init__(self, filename, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.filename = filename.replace('.xlsx', '.flw')
-        self.show_headers = True
-
-    def header(self):
-        self.image('fluck.png', 0, 4, 206)
-        self.add_font('Arial', '', 'Arial.ttf', uni=True)
-        self.add_font('Arial', 'B', 'Arial-Bold.ttf', uni=True)
-        self.add_font('Arial', 'I', 'Arial-Italic.ttf', uni=True)
-        self.add_font('Arial', 'BI', 'Arial-BoldItalic.ttf', uni=True)
-        self.set_font('Arial', 'B', 6.8)
-        self.set_stretching(95.0)
-        if self.show_headers:
-            self.ln(16)
-            self.cell(36, 4, 'Cable ID', 0, 0, 'L')
-            self.cell(33, 4, 'Summary', 0, 0, 'L')
-            self.cell(28, 4, 'Test Limit', 0, 0, 'L')
-            self.cell(30, 4, 'Length', 0, 0, 'L')
-            self.cell(32, 4, 'Headroom', 0, 0, 'L')
-            self.cell(30, 4, 'Date / Time', 0, 0, 'L')
-            self.ln(3.8)
-
-    def footer(self):
-        self.set_y(-28.5)
-        self.image('blue_line.png', 6, 264, 195)
-        self.image('fl.png', 145, 270, 50)
-        self.set_font('Arial', 'B', 9)        
-        self.set_x(6)
-        current_date = datetime.datetime.now().strftime('%d/%m/%Y %H:%M:%S %p')
-        self.cell(90, 8, current_date)
-        self.cell(0, 8, f'Page {self.page_no()}', 0, 0, 'L')
-        self.ln(4)
-        self.set_x(6)
-        self.cell(30, 8, self.filename)
+    app.run(host='0.0.0.0', port=port, debug=True)
