@@ -10,19 +10,19 @@ APP_NAME="fluck"
 echo "Logging into Heroku..."
 heroku whoami &>/dev/null || heroku login
 
-# Проверяем, есть ли уже Heroku-репозиторий в Git
-if ! git remote | grep -q "heroku"; then
-    echo "No Heroku remote found. Checking for existing Heroku app..."
-    
-    # Проверяем, существует ли приложение с таким именем
-    if ! heroku apps | grep -q "$APP_NAME"; then
-        echo "Creating new Heroku app: $APP_NAME"
-        heroku create "$APP_NAME"
-    fi
-    
-    echo "Adding Heroku remote..."
-    heroku git:remote -a "$APP_NAME"
+# Удаляем старый удаленный репозиторий Heroku (если он есть)
+if git remote | grep -q "heroku"; then
+    git remote remove heroku
 fi
+
+# Проверяем, существует ли приложение с таким именем
+if ! heroku apps | grep -q "$APP_NAME"; then
+    echo "Creating new Heroku app: $APP_NAME"
+    heroku create "$APP_NAME"
+fi
+
+# Добавляем Heroku-репозиторий
+git remote add heroku https://git.heroku.com/$APP_NAME.git
 
 # Проверяем, инициализирован ли Git
 if [ ! -d .git ]; then
