@@ -92,7 +92,11 @@ def download_example():
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
-    app.run(host='0.0.0.0', port=port, debug=True)nfig['EXAMPLE_FOLDER'] = 'static/'
+    app.config['EXAMPLE_FOLDER'] = 'static/'
+
+    if __name__ == '__main__':
+        port = int(os.environ.get("PORT", 5000))
+        app.run(host='0.0.0.0', port=port, debug=True)
 
 class PDF(FPDF):
     def __init__(self, filename, *args, **kwargs):
