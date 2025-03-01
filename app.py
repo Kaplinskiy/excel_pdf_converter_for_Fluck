@@ -7,8 +7,7 @@ import random
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'uploads/'
-app.co
-
+app.config['EXAMPLE_FOLDER'] = 'static/'
 
 @app.route('/')
 def index():
