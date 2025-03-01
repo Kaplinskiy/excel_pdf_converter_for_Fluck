@@ -82,8 +82,8 @@ def upload_file():
             pdf.cell(33, h, txt=str(row[1]))
             pdf.cell(28, h, txt=str(row[2]))
             pdf.cell(30, h, txt=str(row[3]) + ' m')
-            pdf.cell(32, h, txt=f'{random.randrange(100, 250, 1)/10:.2f} dB (NEXT)')
-            pdf.cell(30, h, txt=current_time.strftime("%d/%m/%Y %H:%M"), ln=True)
+            pdf.cell(32, h, txt=str(row[4]))#f'{random.randrange(69, 96, 1)/10:.2f} dB (NEXT)')
+            pdf.cell(30, h, txt=str(row[5]))#current_time.strftime("%d/%m/%Y %H:%M"), ln=True)
             current_time += datetime.timedelta(seconds=random.randint(45, 245))
 
         total_length = round(df['Length'].sum(), 2) if 'Length' in df.columns else 0
