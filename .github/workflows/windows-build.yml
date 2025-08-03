@@ -24,6 +24,9 @@ jobs:
           pip install pyinstaller pandas openpyxl fpdf2
 
       - name: Build single-file EXE
+        # На Windows по умолчанию используется PowerShell, в которой '\' не переносит строку.
+        # Указываем явно оболочку bash, чтобы работал многострочный синтаксис с '\'.
+        shell: bash
         run: |
           pyinstaller --onefile --windowed --name ExcelPDFConverter \
             --add-data "fluck.png;." \
