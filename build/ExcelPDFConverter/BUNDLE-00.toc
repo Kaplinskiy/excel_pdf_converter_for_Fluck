@@ -1,0 +1,3 @@
+([('ExcelPDFConverter',
+   '/Users/alexanderkaplinskiy/fluck/dist/ExcelPDFConverter',
+   'EXECUTABLE')],)
