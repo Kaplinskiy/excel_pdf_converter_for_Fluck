@@ -1,6 +1,5 @@
 name: Build Windows EXE
 
-# Запускаем на каждый пуш в main и по ручному запуску (workflow_dispatch)
 on:
   push:
     branches: [ main ]
@@ -37,7 +36,7 @@ jobs:
             main_gui.py
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ExcelPDFConverter.exe
           path: dist/ExcelPDFConverter.exe
