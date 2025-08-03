@@ -1,0 +1,43 @@
+name: Build Windows EXE
+
+# Запускаем на каждый пуш в main и по ручному запуску (workflow_dispatch)
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build-exe:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v3
+
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.8'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyinstaller pandas openpyxl fpdf2
+
+      - name: Build single-file EXE
+        run: |
+          pyinstaller --onefile --windowed --name ExcelPDFConverter \
+            --add-data "fluck.png;." \
+            --add-data "blue_line.png;." \
+            --add-data "fl.png;." \
+            --add-data "Arial.ttf;." \
+            --add-data "Arial-Bold.ttf;." \
+            --add-data "Arial-Italic.ttf;." \
+            --add-data "Arial-BoldItalic.ttf;." \
+            main_gui.py
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: ExcelPDFConverter.exe
+          path: dist/ExcelPDFConverter.exe
