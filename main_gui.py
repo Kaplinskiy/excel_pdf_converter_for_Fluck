@@ -10,12 +10,17 @@ import random
 import subprocess
 
 # =============================================================================
-# helper для PyInstaller --onefile
+# helper для PyInstaller --onefile: корректный путь к ресурсу как при dev, так и в exe
 # =============================================================================
 def resource_path(relative_path):
-    if getattr(sys, "_MEIPASS", False):
-        return os.path.join(sys._MEIPASS, relative_path)
-    return os.path.join(os.path.dirname(os.path.abspath(__file__)), relative_path)
+    """
+    Возвращает абсолютный путь к файлу, учитывая режим --onefile у PyInstaller.
+    """
+    if hasattr(sys, "_MEIPASS"):
+        base = sys._MEIPASS
+    else:
+        base = os.path.dirname(os.path.abspath(__file__))
+    return os.path.join(base, relative_path)
 
 # =============================================================================
 # КЛАСС PDF
@@ -27,20 +32,22 @@ class PDF(FPDF):
         self.show_headers = True
 
     def header(self):
+        # логотип
         self.image(resource_path('fluck.png'), 0, 4, 206)
-        self.add_font('Arial', '', 'Arial.ttf', uni=True)
-        self.add_font('Arial', 'B', 'Arial-Bold.ttf', uni=True)
-        self.add_font('Arial', 'I', 'Arial-Italic.ttf', uni=True)
-        self.add_font('Arial', 'BI', 'Arial-BoldItalic.ttf', uni=True)
+        # шрифты (путь через resource_path)
+        self.add_font('Arial',  '', resource_path('Arial.ttf'),            uni=True)
+        self.add_font('Arial',  'B', resource_path('Arial-Bold.ttf'),      uni=True)
+        self.add_font('Arial',  'I', resource_path('Arial-Italic.ttf'),    uni=True)
+        self.add_font('Arial', 'BI', resource_path('Arial-BoldItalic.ttf'), uni=True)
         self.set_font('Arial', 'B', 6.8)
         if self.show_headers:
             self.ln(16)
-            self.cell(36, 4, 'Cable ID',     0, 0, 'L')
-            self.cell(33, 4, 'Summary',      0, 0, 'L')
-            self.cell(28, 4, 'Test Limit',   0, 0, 'L')
-            self.cell(30, 4, 'Length',       0, 0, 'L')
-            self.cell(32, 4, 'Headroom',     0, 0, 'L')
-            self.cell(30, 4, 'Date / Time',  0, 0, 'L')
+            self.cell(36, 4, 'Cable ID',    0, 0, 'L')
+            self.cell(33, 4, 'Summary',     0, 0, 'L')
+            self.cell(28, 4, 'Test Limit',  0, 0, 'L')
+            self.cell(30, 4, 'Length',      0, 0, 'L')
+            self.cell(32, 4, 'Headroom',    0, 0, 'L')
+            self.cell(30, 4, 'Date / Time', 0, 0, 'L')
             self.ln(3.8)
 
     def footer(self):
@@ -73,14 +80,14 @@ def convert():
         messagebox.showerror("Ошибка", "Файл не выбран")
         return
 
-    # Читаем Excel
+    # Чтение Excel
     try:
         df = pd.read_excel(path, engine='openpyxl')
     except Exception as e:
         messagebox.showerror("Ошибка чтения Excel", str(e))
         return
 
-    # Парсим дату/время старта
+    # Парсинг даты/времени старта
     try:
         current_time = datetime.datetime.strptime(
             f"{date_var.get()} {time_var.get()}",
@@ -119,34 +126,32 @@ def convert():
         pdf.show_headers = False
         pdf.add_page()
         pdf.set_y(26); pdf.set_x(6); pdf.set_font('Arial','',9)
-        pdf.cell(0,10,'Total Length:',                 0,1,'L')
-        pdf.cell(0,10,'Number of Reports:',            0,1,'L')
-        pdf.cell(0,10,'Number of Passing Reports:',    0,1,'L')
-        pdf.cell(0,10,'Number of Failing Reports:',    0,1,'L')
-        pdf.cell(0,10,'Number of Warning Reports:',    0,1,'L')
-        pdf.cell(0,10,'Documentation Only:',           0,1,'L')
+        pdf.cell(0,10,'Total Length:',              0,1,'L')
+        pdf.cell(0,10,'Number of Reports:',         0,1,'L')
+        pdf.cell(0,10,'Number of Passing Reports:', 0,1,'L')
+        pdf.cell(0,10,'Number of Failing Reports:', 0,1,'L')
+        pdf.cell(0,10,'Number of Warning Reports:', 0,1,'L')
+        pdf.cell(0,10,'Documentation Only:',        0,1,'L')
 
         pdf.set_y(26)
-        pdf.cell(60,10,f'{total_length} m',            0,1,'R')
-        pdf.cell(60,10,f'{total_reports}',             0,1,'R')
-        pdf.cell(60,10,f'{passing_reports}',           0,1,'R')
-        pdf.cell(60,10,f'{failing_reports}',           0,1,'R')
-        pdf.cell(60,10,f'{warning_reports}',           0,1,'R')
-        pdf.cell(60,10,f'{documentation_only}',        0,1,'R')
+        pdf.cell(60,10,f'{total_length} m',         0,1,'R')
+        pdf.cell(60,10,f'{total_reports}',          0,1,'R')
+        pdf.cell(60,10,f'{passing_reports}',        0,1,'R')
+        pdf.cell(60,10,f'{failing_reports}',        0,1,'R')
+        pdf.cell(60,10,f'{warning_reports}',        0,1,'R')
+        pdf.cell(60,10,f'{documentation_only}',     0,1,'R')
 
     except Exception as e:
         messagebox.showerror("Ошибка генерации PDF", str(e))
         return
 
-    # Сохраняем всегда с .pdf
+    # Сохранение
     base, _ = os.path.splitext(path)
     out = base + '.pdf'
     pdf.output(out)
 
-    # Уведомление
+    # Уведомление и открытие
     messagebox.showinfo("Готово", f"PDF сохранён по адресу:\n{out}")
-
-    # Открываем PDF
     if os.name == 'nt':
         os.startfile(out)
     else:
