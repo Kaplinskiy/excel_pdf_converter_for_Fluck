@@ -10,14 +10,10 @@ import random
 import subprocess
 
 # =============================================================================
-# helper для PyInstaller --onefile: возвращает корректный путь к ресурсу
+# helper для PyInstaller --onefile
 # =============================================================================
 def resource_path(relative_path):
-    """
-    Возвращает абсолютный путь к файлу, как в режиме разработки,
-    так и внутри замороженного exe (sys._MEIPASS).
-    """
-    if getattr(sys, '_MEIPASS', False):
+    if getattr(sys, "_MEIPASS", False):
         return os.path.join(sys._MEIPASS, relative_path)
     return os.path.join(os.path.dirname(os.path.abspath(__file__)), relative_path)
 
@@ -31,9 +27,7 @@ class PDF(FPDF):
         self.show_headers = True
 
     def header(self):
-        # логотип
         self.image(resource_path('fluck.png'), 0, 4, 206)
-        # шрифты
         self.add_font('Arial', '', 'Arial.ttf', uni=True)
         self.add_font('Arial', 'B', 'Arial-Bold.ttf', uni=True)
         self.add_font('Arial', 'I', 'Arial-Italic.ttf', uni=True)
@@ -79,14 +73,14 @@ def convert():
         messagebox.showerror("Ошибка", "Файл не выбран")
         return
 
-    # Чтение Excel
+    # Читаем Excel
     try:
         df = pd.read_excel(path, engine='openpyxl')
     except Exception as e:
         messagebox.showerror("Ошибка чтения Excel", str(e))
         return
 
-    # Парсим стартовую дату/время
+    # Парсим дату/время старта
     try:
         current_time = datetime.datetime.strptime(
             f"{date_var.get()} {time_var.get()}",
@@ -97,52 +91,62 @@ def convert():
         return
 
     # Генерация PDF
-    pdf = PDF(os.path.basename(path))
-    pdf.add_page()
-    pdf.set_font('Arial', '', 6.8)
-    h = 2.8
+    try:
+        pdf = PDF(os.path.basename(path))
+        pdf.add_page()
+        pdf.set_font('Arial', '', 6.8)
+        h = 2.8
 
-    for _, row in df.iterrows():
-        if pdf.get_y() > 260:
-            pdf.add_page()
-        pdf.cell(36, h, str(row[0]))
-        pdf.cell(33, h, str(row[1]))
-        pdf.cell(28, h, str(row[2]))
-        pdf.cell(30, h, str(row[3]) + ' m')
-        pdf.cell(32, h, f'{random.randrange(100,250)/10:.2f} dB (NEXT)')
-        pdf.cell(30, h, current_time.strftime("%d/%m/%Y %H:%M"), ln=True)
-        current_time += datetime.timedelta(seconds=random.randint(15,35))
+        for _, row in df.iterrows():
+            if pdf.get_y() > 260:
+                pdf.add_page()
+            pdf.cell(36, h, str(row[0]))
+            pdf.cell(33, h, str(row[1]))
+            pdf.cell(28, h, str(row[2]))
+            pdf.cell(30, h, str(row[3]) + ' m')
+            pdf.cell(32, h, f'{random.randrange(100,250)/10:.2f} dB (NEXT)')
+            pdf.cell(30, h, current_time.strftime("%d/%m/%Y %H:%M"), ln=True)
+            current_time += datetime.timedelta(seconds=random.randint(15,35))
 
-    # Итоги
-    total_length       = round(df['Length'].sum(),2) if 'Length' in df.columns else 0
-    total_reports      = len(df)
-    passing_reports    = df[df['Summary']=='PASS'].shape[0] if 'Summary' in df.columns else 0
-    failing_reports    = df[df['Summary']=='FAIL'].shape[0] if 'Summary' in df.columns else 0
-    warning_reports    = df[df['Summary']=='WARNING'].shape[0] if 'Summary' in df.columns else 0
-    documentation_only = df[df['Summary']=='DOCUMENTATION ONLY'].shape[0] if 'Summary' in df.columns else 0
+        # Итоги
+        total_length       = round(df['Length'].sum(),2) if 'Length' in df.columns else 0
+        total_reports      = len(df)
+        passing_reports    = df[df['Summary']=='PASS'].shape[0] if 'Summary' in df.columns else 0
+        failing_reports    = df[df['Summary']=='FAIL'].shape[0] if 'Summary' in df.columns else 0
+        warning_reports    = df[df['Summary']=='WARNING'].shape[0] if 'Summary' in df.columns else 0
+        documentation_only = df[df['Summary']=='DOCUMENTATION ONLY'].shape[0] if 'Summary' in df.columns else 0
 
-    pdf.show_headers = False
-    pdf.add_page()
-    pdf.set_y(26); pdf.set_x(6); pdf.set_font('Arial','',9)
-    pdf.cell(0,10,'Total Length:',                 0,1,'L')
-    pdf.cell(0,10,'Number of Reports:',            0,1,'L')
-    pdf.cell(0,10,'Number of Passing Reports:',    0,1,'L')
-    pdf.cell(0,10,'Number of Failing Reports:',    0,1,'L')
-    pdf.cell(0,10,'Number of Warning Reports:',    0,1,'L')
-    pdf.cell(0,10,'Documentation Only:',           0,1,'L')
+        pdf.show_headers = False
+        pdf.add_page()
+        pdf.set_y(26); pdf.set_x(6); pdf.set_font('Arial','',9)
+        pdf.cell(0,10,'Total Length:',                 0,1,'L')
+        pdf.cell(0,10,'Number of Reports:',            0,1,'L')
+        pdf.cell(0,10,'Number of Passing Reports:',    0,1,'L')
+        pdf.cell(0,10,'Number of Failing Reports:',    0,1,'L')
+        pdf.cell(0,10,'Number of Warning Reports:',    0,1,'L')
+        pdf.cell(0,10,'Documentation Only:',           0,1,'L')
 
-    pdf.set_y(26)
-    pdf.cell(60,10,f'{total_length} m',            0,1,'R')
-    pdf.cell(60,10,f'{total_reports}',             0,1,'R')
-    pdf.cell(60,10,f'{passing_reports}',           0,1,'R')
-    pdf.cell(60,10,f'{failing_reports}',           0,1,'R')
-    pdf.cell(60,10,f'{warning_reports}',           0,1,'R')
-    pdf.cell(60,10,f'{documentation_only}',        0,1,'R')
+        pdf.set_y(26)
+        pdf.cell(60,10,f'{total_length} m',            0,1,'R')
+        pdf.cell(60,10,f'{total_reports}',             0,1,'R')
+        pdf.cell(60,10,f'{passing_reports}',           0,1,'R')
+        pdf.cell(60,10,f'{failing_reports}',           0,1,'R')
+        pdf.cell(60,10,f'{warning_reports}',           0,1,'R')
+        pdf.cell(60,10,f'{documentation_only}',        0,1,'R')
 
-    out = path.replace('.xlsx', '.pdf')
+    except Exception as e:
+        messagebox.showerror("Ошибка генерации PDF", str(e))
+        return
+
+    # Сохраняем всегда с .pdf
+    base, _ = os.path.splitext(path)
+    out = base + '.pdf'
     pdf.output(out)
 
-    # Открытие сгенерированного PDF
+    # Уведомление
+    messagebox.showinfo("Готово", f"PDF сохранён по адресу:\n{out}")
+
+    # Открываем PDF
     if os.name == 'nt':
         os.startfile(out)
     else:
@@ -156,14 +160,8 @@ def create_ui():
     root.resizable(False, False)
 
     file_var = tk.StringVar(master=root)
-    date_var = tk.StringVar(
-        master=root,
-        value=datetime.date.today().strftime("%Y-%m-%d")
-    )
-    time_var = tk.StringVar(
-        master=root,
-        value=datetime.datetime.now().strftime("%H:%M")
-    )
+    date_var = tk.StringVar(master=root, value=datetime.date.today().strftime("%Y-%m-%d"))
+    time_var = tk.StringVar(master=root, value=datetime.datetime.now().strftime("%H:%M"))
 
     tk.Label(root, text="Excel-файл:").grid(row=0, column=0, padx=5, pady=5, sticky="e")
     tk.Entry(root,  textvariable=file_var, width=50).grid(row=0, column=1, padx=5, pady=5)
