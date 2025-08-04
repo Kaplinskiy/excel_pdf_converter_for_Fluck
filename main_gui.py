@@ -125,21 +125,26 @@ def convert():
 
         pdf.show_headers = False
         pdf.add_page()
-        pdf.set_y(26); pdf.set_x(6); pdf.set_font('Arial','',9)
-        pdf.cell(0,10,'Total Length:',              0,1,'L')
-        pdf.cell(0,10,'Number of Reports:',         0,1,'L')
-        pdf.cell(0,10,'Number of Passing Reports:', 0,1,'L')
-        pdf.cell(0,10,'Number of Failing Reports:', 0,1,'L')
-        pdf.cell(0,10,'Number of Warning Reports:', 0,1,'L')
-        pdf.cell(0,10,'Documentation Only:',        0,1,'L')
-
         pdf.set_y(26)
-        pdf.cell(60,10,f'{total_length} m',         0,1,'R')
-        pdf.cell(60,10,f'{total_reports}',          0,1,'R')
-        pdf.cell(60,10,f'{passing_reports}',        0,1,'R')
-        pdf.cell(60,10,f'{failing_reports}',        0,1,'R')
-        pdf.cell(60,10,f'{warning_reports}',        0,1,'R')
-        pdf.cell(60,10,f'{documentation_only}',     0,1,'R')
+        pdf.set_x(6)
+        pdf.set_font('Arial', '', 9)
+
+        # Левый столбец
+        pdf.cell(0, 3.3, 'Total Length:',              0, 1, 'L'); pdf.set_x(6)
+        pdf.cell(0, 3.3, 'Number of Reports:',         0, 1, 'L'); pdf.set_x(6)
+        pdf.cell(0, 3.3, 'Number of Passing Reports:', 0, 1, 'L'); pdf.set_x(6)
+        pdf.cell(0, 3.3, 'Number of Failing Reports:', 0, 1, 'L'); pdf.set_x(6)
+        pdf.cell(0, 3.3, 'Number of Warning Reports:', 0, 1, 'L'); pdf.set_x(6)
+        pdf.cell(0, 3.3, 'Documentation Only:',        0, 1, 'L')
+
+        # Правый столбец (значения)
+        pdf.set_y(26)
+        pdf.cell(60, 3.3, f'{total_length} m',      0, 1, 'R')
+        pdf.cell(60, 3.3, f'{total_reports}',       0, 1, 'R')
+        pdf.cell(60, 3.3, f'{passing_reports}',     0, 1, 'R')
+        pdf.cell(60, 3.3, f'{failing_reports}',     0, 1, 'R')
+        pdf.cell(60, 3.3, f'{warning_reports}',     0, 1, 'R')
+        pdf.cell(60, 3.3, f'{documentation_only}',  0, 1, 'R')
 
     except Exception as e:
         messagebox.showerror("Ошибка генерации PDF", str(e))
