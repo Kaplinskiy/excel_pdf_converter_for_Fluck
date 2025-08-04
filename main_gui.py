@@ -170,9 +170,33 @@ def create_ui():
 
     root.mainloop()
 
-if __name__ == "__main__":
-    # Глобальные переменные для UI
-    file_var = tk.StringVar()
-    date_var = tk.StringVar(value=datetime.date.today().isoformat())
-    time_var = tk.StringVar(value=datetime.datetime.now().strftime("%H:%M"))
-    create_ui()
+--- main_gui.py
++++ main_gui.py
+@@
+-def create_ui():
+-    root = tk.Tk()
++def create_ui():
++    global file_var, date_var, time_var
++    root = tk.Tk()
++    # Создаём переменные после появления окна
++    file_var = tk.StringVar(master=root)
++    date_var = tk.StringVar(master=root,
++                             value=datetime.date.today().isoformat())
++    time_var = tk.StringVar(master=root,
++                             value=datetime.datetime.now().strftime("%H:%M"))
++
+     root.title("Excel → PDF Converter")
+     root.geometry("480x200")
+     root.resizable(False, False)
+@@
+-    root.mainloop()
++    root.mainloop()
+@@
+-if __name__ == "__main__":
+-    # Глобальные переменные для UI
+-    file_var = tk.StringVar()
+-    date_var = tk.StringVar(value=datetime.date.today().isoformat())
+-    time_var = tk.StringVar(value=datetime.datetime.now().strftime("%H:%M"))
+-    create_ui()
++if __name__ == "__main__":
++    create_ui()
